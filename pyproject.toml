@@ -1,13 +1,16 @@
 [tool.poetry]
 name = "materialsml"
 version = "0.1.0"
-description = ""
+description = "A Machine Learning package for materials informatics"
 authors = ["andrewrgarcia <garcia.gtr@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.9.0"
+python = "3.8.3"
 stellargraph = "^1.2.1"
+mp-api = "^0.30.5"
+pytest = "^7.2.0"
+mpcontribs-client = "^5.0.7"
 
 
 [build-system]
