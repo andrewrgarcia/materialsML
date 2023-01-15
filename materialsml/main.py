@@ -104,7 +104,7 @@ class Solid:
 
 
 class Crate:
-    def __init__( self, API_KEY, MATERIALS = 'mp-1103503'):
+    def __init__( self, API_KEY):
         '''Material class. To store and process material data
 
         Parameters
@@ -117,40 +117,40 @@ class Crate:
             Heterogeneous graph to store all information from a `Solid` material
         '''
         self.API_KEY = API_KEY
-        self.MATERIALS = MATERIALS
+        self.MATERIALS = []
         self.graphs = {}
         self.blacklist = []
 
     def addFeature(func):
         def wrapper(self):
-
             for i in self.MATERIALS:
                 if i not in self.blacklist:
                     if self.graphs.get(i) == None:
                         self.graphs.update({ i: {} })
-                
-                x,y = func(i)
-
-                self.graphs[i].update({ y: x })
+                    'try if entries for the i material exist else eliminate material from dataset and put on blacklist'
+                    try:
+                        x,y = func(i)
+                        self.graphs[i].update({ y: x })
+                    except:
+                        self.graphs.pop(i)
+                        self.blacklist.append(i)
 
         return wrapper
 
-# @addFeature
-# def foo(x):
-#     return x+1
-'example / model'
-@Crate.addFeature
-def rester(x):
-    with MPRester(api_key='<enter your api key>') as mpr:
 
-        # for a single material
-        # thermo_doc = mpr.thermo.get_data_by_id('mp-1103503')
-        # thermo_doc = mpr.thermo.get_data_by_id(x)
+# 'example / model'
+# @Crate.addFeature
+# def rester(x):
+#     with MPRester(api_key='<enter your api key>') as mpr:
 
-        # for many materials, it's much faster to use
-        # the `search` method, where additional material_ids can 
-        # be added to this list
-        # thermo_docs = mpr.thermo.search(material_ids=['mp-1103503'])
-        thermo_docs = mpr.thermo.search(material_ids=[x])
+#         # for a single material
+#         # thermo_doc = mpr.thermo.get_data_by_id('mp-1103503')
+#         # thermo_doc = mpr.thermo.get_data_by_id(x)
 
-    return thermo_docs, 'thermo_label'
+#         # for many materials, it's much faster to use
+#         # the `search` method, where additional material_ids can 
+#         # be added to this list
+#         # thermo_docs = mpr.thermo.search(material_ids=['mp-1103503'])
+#         thermo_docs = mpr.thermo.search(material_ids=[x])
+
+#     return thermo_docs, 'thermo_label'
