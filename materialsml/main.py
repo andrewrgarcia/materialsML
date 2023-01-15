@@ -121,7 +121,7 @@ class Crate:
         self.graphs = {}
         self.blacklist = []
 
-    def addFeature(func):
+    def addFeature(self,func):
         def wrapper(self):
             for i in self.MATERIALS:
                 if i not in self.blacklist:
@@ -130,27 +130,14 @@ class Crate:
                     'try if entries for the i material exist else eliminate material from dataset and put on blacklist'
                     try:
                         x,y = func(i)
-                        self.graphs[i].update({ y: x })
                     except:
+                        pass
+
+                    if x:
+                        self.graphs[i].update({ y: x })
+                    else:
                         self.graphs.pop(i)
                         self.blacklist.append(i)
 
         return wrapper
 
-
-# 'example / model'
-# @Crate.addFeature
-# def rester(x):
-#     with MPRester(api_key='<enter your api key>') as mpr:
-
-#         # for a single material
-#         # thermo_doc = mpr.thermo.get_data_by_id('mp-1103503')
-#         # thermo_doc = mpr.thermo.get_data_by_id(x)
-
-#         # for many materials, it's much faster to use
-#         # the `search` method, where additional material_ids can 
-#         # be added to this list
-#         # thermo_docs = mpr.thermo.search(material_ids=['mp-1103503'])
-#         thermo_docs = mpr.thermo.search(material_ids=[x])
-
-#     return thermo_docs, 'thermo_label'
