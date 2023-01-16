@@ -11,7 +11,7 @@ def test_materialprops():
     material.topology()
     print(material.graph)
 
-    material.add_factor('poo',10203)
+    material.addProperty('poo',10203)
 
     print(material.graph)
 
