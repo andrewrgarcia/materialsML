@@ -2,13 +2,13 @@ from mp_api.client import MPRester
 from pymatgen.analysis.diffraction.xrd import XRDCalculator
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
-import stellargraph as sg
-try:
-    sg.utils.validate_notebook_version("1.2.1")
-except AttributeError:
-    raise ValueError(
-        f"This notebook requires StellarGraph version 1.2.1, but a different version {sg.__version__} is installed.  Please see <https://github.com/stellargraph/stellargraph/issues/1172>."
-    ) from None
+# import stellargraph as sg
+# try:
+#     sg.utils.validate_notebook_version("1.2.1")
+# except AttributeError:
+#     raise ValueError(
+#         f"This notebook requires StellarGraph version 1.2.1, but a different version {sg.__version__} is installed.  Please see <https://github.com/stellargraph/stellargraph/issues/1172>."
+#     ) from None
     
 from stellargraph import StellarGraph
 import pandas
@@ -198,14 +198,23 @@ class Crate:
 
         return graph_labels, stellar_graphs
 
+from tensorflow.keras.optimizers import Adam
+from materialsml.neuralnetwork import GraphNet
+
+import stellargraph as sg
+from stellargraph.mapper import PaddedGraphGenerator
+
+from sklearn import model_selection
+
 
 class Engine:
     
     def __init__(self):
         self.graphs = []
         self.graph_labels = []
-        pass
-
+        self.epochs = 500
+        self.fitted_model = []
+        self.test_gen = []
     
     def desc(self):
         summary = pandas.DataFrame(
@@ -213,3 +222,52 @@ class Engine:
         columns=["nodes", "edges"],
         )
         summary.describe().round(1)
+
+    
+    def train(self, plot=True):
+        model = GraphNet(self.graphs)
+        model.compile( optimizer=Adam(lr=0.0001), loss="mean_squared_error")
+        
+        train_graphs, test_graphs = model_selection.train_test_split(self.graph_labels, train_size=0.9, test_size=None)
+
+        gen = PaddedGraphGenerator(graphs=self.graphs)
+
+        train_gen = gen.flow(
+            list(train_graphs.index - 1),
+            targets=train_graphs.values,
+            batch_size=1,
+            symmetric_normalization=False,
+        )
+
+        test_gen = gen.flow(
+            list(test_graphs.index - 1),
+            targets=test_graphs.values,
+            batch_size=1,
+            symmetric_normalization=False,
+        )
+
+        self.test_gen = test_gen
+
+        history = model.fit(
+            train_gen, epochs=self.epochs, verbose=1, validation_data=test_gen, shuffle=True,
+        )
+
+        self.fitted_model = model
+
+        sg.utils.plot_history(history) if plot else None
+
+
+    def test(self): return self.fitted_model.evaluate(self.test_gen)
+
+    def predict(self, test_graphs ):
+
+        predictions = self.fitted_model.predict(self.test_gen)
+        ground_truth = test_graphs.values
+
+        def reshapemodel(x): return x.reshape(x.shape[0])
+        
+        predictions = reshapemodel(predictions)
+        ground_truth = reshapemodel(ground_truth)
+
+        summary= pandas.DataFrame({'ground_truth':ground_truth, 'predictions':predictions})
+        print(summary)
