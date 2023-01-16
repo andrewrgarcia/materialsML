@@ -205,9 +205,9 @@ import stellargraph as sg
 from stellargraph.mapper import PaddedGraphGenerator
 
 from sklearn import model_selection
+from tensorflow import keras
 
-
-class Engine:
+class Network:
     
     def __init__(self):
         self.graphs = []
@@ -256,10 +256,19 @@ class Engine:
 
         sg.utils.plot_history(history) if plot else None
 
+    def save(self,path='path/to/location'):
+        
+        self.fitted_model.save()
+
+    def load(self,path='path/to/location'):
+
+        model = keras.models.load_model('path/to/location')
+        self.fitted_model = model
+
 
     def test(self): return self.fitted_model.evaluate(self.test_gen)
 
-    def predict(self, test_graphs ):
+    def predict(self, test_graphs):
 
         predictions = self.fitted_model.predict(self.test_gen)
         ground_truth = test_graphs.values
