@@ -43,6 +43,27 @@ def test_multiREST():
 
         return magnetism_doc.magmoms, 'mag. moments'
 
+    @crate.addProperty
+    def num_magsites(CRATE):      
+        '''magnetic properties data for Material'''
+        with MPRester(api_key=mml.SECRET_KEY) as mpr:
+            magnetism_doc = mpr.magnetism.get_data_by_id(CRATE)
+
+        return magnetism_doc.num_unique_magnetic_sites, 'num unique mag. sites'
+
+    @crate.addProperty
+    def thermo(CRATE):
+
+        with MPRester(api_key=mml.SECRET_KEY) as mpr:
+            # # for a single material
+            # thermo_doc = mpr.thermo.get_data_by_id('mp-1103503')
+
+            # # for many materials, it's much faster to use
+            # # the `search` method, where additional material_ids can 
+            # # be added to this list
+            thermo_docs = mpr.thermo.search(material_ids=[CRATE])
+
+        return thermo_docs[0].formation_energy_per_atom, 'form. energy'
 
     crate.MATERIALS = ['mp-110350'+str(i) for i in range(9)]
 
@@ -53,6 +74,8 @@ def test_multiREST():
     bandgap(crate)
     totalmag(crate)
     magmoms(crate) 
+    # num_magsites(crate)      
+    # thermo(crate)
 
 
     print(crate.graphs)

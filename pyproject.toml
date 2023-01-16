@@ -12,6 +12,7 @@ mp-api = "^0.30.5"
 pytest = "^7.2.0"
 mpcontribs-client = "^5.0.7"
 boto3 = "^1.26.50"
+chardet = "^5.1.0"
 
 
 [build-system]
