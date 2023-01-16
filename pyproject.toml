@@ -11,6 +11,7 @@ stellargraph = "^1.2.1"
 mp-api = "^0.30.5"
 pytest = "^7.2.0"
 mpcontribs-client = "^5.0.7"
+boto3 = "^1.26.50"
 
 
 [build-system]
