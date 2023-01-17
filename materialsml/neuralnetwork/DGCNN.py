@@ -18,12 +18,12 @@ from tensorflow.keras.losses import binary_crossentropy
 import tensorflow as tf
 
 class GraphNet():
-    def __init__(self):
-        self.graphs = []
+    def __init__(self,GRAPHS):
+        self.GRAPHS = GRAPHS
 
     def build(self):
 
-        generator = PaddedGraphGenerator(graphs=self.graphs)
+        generator = PaddedGraphGenerator(graphs=self.GRAPHS)
 
         k = 35  # the number of rows for the output tensor
         layer_sizes = [32, 32, 32, 1]

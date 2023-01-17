@@ -193,24 +193,21 @@ class Crate:
                     for k in ["atomic_number",*list('xyz')]:
                         self.graphs[mid].update({ k : topol_nodes[k]})
                 else:
-                    print(j)
                     self.graphs[mid].update({j : getattr(i,j)})
 
-    def process(self,label='num_sites'):
-        '''Process graphs for machine learning. 
-
+    def remove_field(self,field='total_magnetization'):
+        '''
         Parameters
         ----------
-        label : str
-            label name of the property to use as the dependent Y variable in the machine
-            learning method. Gets removed from graph keys and placed in a new `graphs_label` list.  
+        field : str
+            field / property to remove from graphs data
         '''
-        graph_labels = [self.graphs[i].pop(label) for i in self.graphs.keys() ]
+        try:
+            for i in self.graphs.keys(): 
+                    self.graphs[i].pop(field)
+        except:
+            print(field+" not in graphs")
 
-        stellar_graphs = [ StellarGraph(pandas.DataFrame(self.graphs[i])) for i in self.graphs.keys() ]    
-        # stellar_graphs = [ pandas.DataFrame(self.graphs[i]) for i in self.graphs.keys() ]    
-
-        return graph_labels, stellar_graphs
 
 from tensorflow.keras.optimizers import Adam
 from materialsml.neuralnetwork import GraphNet
@@ -230,6 +227,26 @@ class Network:
         self.fitted_model = []
         self.test_gen = []
 
+    def importgraphs(self,graphs,label='band_gaps'):
+        '''Process graphs for machine learning. 
+
+        Parameters
+        ----------
+        graphs : dict{*dict: *{}}
+            a map of graphs with material properties of N-materials. 
+        label : str
+            label name of the property to use as the dependent Y variable in the machine
+            learning method. Gets removed from graph keys and placed in a new `graphs_label` list.  
+        '''
+        self.graphs = graphs
+        graph_labels = [self.graphs[i].pop(label) for i in self.graphs.keys() ]
+        self.graph_labels  = graph_labels 
+
+        stellar_graphs = [ StellarGraph(pandas.DataFrame(self.graphs[i])) for i in self.graphs.keys() ]  
+        self.graphs = stellar_graphs  
+
+        return graph_labels, stellar_graphs
+
     def save(self,path='path/to/location'):
         
         self.fitted_model.save()
@@ -244,11 +261,13 @@ class Network:
         [(g.number_of_nodes(), g.number_of_edges()) for g in self.graphs],
         columns=["nodes", "edges"],
         )
-        summary.describe().round(1)
+        
+        print(summary.describe().round(1))
 
     
     def train(self, plot=True):
-        model = GraphNet(self.graphs)
+        # neuralnet = 
+        model = GraphNet(self.graphs).build()
         model.compile( optimizer=Adam(lr=0.0001), loss="mean_squared_error")
         
         train_graphs, test_graphs = model_selection.train_test_split(self.graph_labels, train_size=0.9, test_size=None)
