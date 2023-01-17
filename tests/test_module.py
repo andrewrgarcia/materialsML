@@ -1,10 +1,11 @@
 import materialsml as mml
 from mp_api.client import MPRester
 
-# replace below line with API key [ in string form ] from Materials Project site (https://materialsproject.org/api#api-key)
+'''replace line 6 with API key [ in string form ] from Materials Project site (https://materialsproject.org/api#api-key) 
+and all mml.SECRET_KEY variable calls with SECRET_KEY  (see lines 9 - 10)'''
 # SECRET_KEY = ''    
 
-def te3st_materialprops():
+def test_materialprops():
     # material = mml.Solid(SECRET_KEY, 'mp-1103503')
     material = mml.Solid(mml.SECRET_KEY, 'mp-1103503')
 
@@ -16,7 +17,7 @@ def te3st_materialprops():
     print(material.graph)
 
 
-def tes3t_multiREST():
+def test_multiREST():
     crate = mml.Crate(mml.SECRET_KEY)
     crate.MATERIALS =  ['mp-'+str(i) for i in range(100)]
     crate.queryAdd(["structure","total_magnetization","band_gap"])
@@ -25,7 +26,7 @@ def tes3t_multiREST():
 
     crate.save('graphs_test.json')
 
-def tes3t_graphs_loadsaveload():
+def test_graphs_loadsaveload():
     crate = mml.Crate(mml.SECRET_KEY)
     crate.load('graphs_test.json')
     crate.remove_field('band_gap')

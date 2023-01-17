@@ -239,10 +239,17 @@ class Network:
             learning method. Gets removed from graph keys and placed in a new `graphs_label` list.  
         '''
         self.graphs = graphs
-        graph_labels = [self.graphs[i].pop(label) for i in self.graphs.keys() ]
+        graph_labels = pandas.DataFrame([self.graphs[i].pop(label) for i in self.graphs.keys() ])
         self.graph_labels  = graph_labels 
 
-        stellar_graphs = [ StellarGraph(pandas.DataFrame(self.graphs[i])) for i in self.graphs.keys() ]  
+        stellar_graphs = []
+        for i in self.graphs:
+            n_atoms = len(self.graphs[i]['atomic_number'])
+            df = pandas.DataFrame(self.graphs[i], index = [idx for idx in range(n_atoms)])
+            # print(df)
+            stellar_graphs.append(StellarGraph(df))
+
+        # stellar_graphs = [ StellarGraph(pandas.DataFrame(self.graphs[i])) for i in self.graphs.keys() ]  
         self.graphs = stellar_graphs  
 
         return graph_labels, stellar_graphs
@@ -266,11 +273,11 @@ class Network:
 
     
     def train(self, plot=True):
-        # neuralnet = 
         model = GraphNet(self.graphs).build()
         model.compile( optimizer=Adam(lr=0.0001), loss="mean_squared_error")
         
-        train_graphs, test_graphs = model_selection.train_test_split(self.graph_labels, train_size=0.9, test_size=None)
+        train_graphs, test_graphs = model_selection.train_test_split(self.graph_labels,\
+             train_size=0.7, test_size=None)
 
         gen = PaddedGraphGenerator(graphs=self.graphs)
 
@@ -288,7 +295,6 @@ class Network:
             symmetric_normalization=False,
         )
 
-        self.test_gen = test_gen
 
         history = model.fit(
             train_gen, epochs=self.epochs, verbose=1, validation_data=test_gen, shuffle=True,
