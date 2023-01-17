@@ -22,34 +22,45 @@ def test_multiREST():
     @crate.addProperty
     def bandgap(CRATE):
         with MPRester(api_key=mml.SECRET_KEY) as mpr:
-            bandstructure = mpr.get_bandstructure_by_material_id(CRATE,line_mode=False)
-            band_gap = bandstructure.get_band_gap()['energy']
-
-        return band_gap, 'band_gap_energy'
+            try:
+                bandstructure = mpr.get_bandstructure_by_material_id(CRATE,line_mode=False)
+            except:
+                pass
+            feature = bandstructure.get_band_gap()['energy'] if bandstructure else None
+        return feature, 'band_gap_energy'
 
     @crate.addProperty
     def totalmag(CRATE):      
         '''magnetic properties data for Material'''
         with MPRester(api_key=mml.SECRET_KEY) as mpr:
-            magnetism_doc = mpr.magnetism.get_data_by_id(CRATE)
-
-        return magnetism_doc.total_magnetization, 'total magnetization'
+            try:
+                magnetism_doc = mpr.magnetism.get_data_by_id(CRATE)
+            except:
+                pass
+            feature = magnetism_doc.total_magnetization if magnetism_doc else None
+        return feature, 'total magnetization'
 
     @crate.addProperty
     def magmoms(CRATE):      
         '''magnetic properties data for Material'''
         with MPRester(api_key=mml.SECRET_KEY) as mpr:
-            magnetism_doc = mpr.magnetism.get_data_by_id(CRATE)
-
-        return magnetism_doc.magmoms, 'mag. moments'
+            try:
+                magnetism_doc = mpr.magnetism.get_data_by_id(CRATE)
+            except:
+                pass
+            feature = magnetism_doc.magmoms if magnetism_doc else None 
+        return feature, 'mag. moments'
 
     @crate.addProperty
     def num_magsites(CRATE):      
         '''magnetic properties data for Material'''
         with MPRester(api_key=mml.SECRET_KEY) as mpr:
-            magnetism_doc = mpr.magnetism.get_data_by_id(CRATE)
-
-        return magnetism_doc.num_unique_magnetic_sites, 'num unique mag. sites'
+            try:
+                magnetism_doc = mpr.magnetism.get_data_by_id(CRATE)
+            except:
+                pass
+            feature = magnetism_doc.num_unique_magnetic_sites if magnetism_doc else None
+        return feature, 'num unique mag. sites'
 
     @crate.addProperty
     def thermo(CRATE):
@@ -61,11 +72,14 @@ def test_multiREST():
             # # for many materials, it's much faster to use
             # # the `search` method, where additional material_ids can 
             # # be added to this list
-            thermo_docs = mpr.thermo.search(material_ids=[CRATE])
+            try:
+                thermo_docs = mpr.thermo.search(material_ids=[CRATE])
+            except:
+                pass
+            feature = thermo_docs[0].formation_energy_per_atom if thermo_docs else None
+        return feature, 'form. energy'
 
-        return thermo_docs[0].formation_energy_per_atom, 'form. energy'
-
-    crate.MATERIALS = ['mp-110350'+str(i) for i in range(9)]
+    crate.MATERIALS = ['mp-'+str(i) for i in range(1103500,1103530)]
 
     print(crate.MATERIALS)
 
@@ -73,7 +87,7 @@ def test_multiREST():
 
     bandgap(crate)
     totalmag(crate)
-    magmoms(crate) 
+    # magmoms(crate) 
     # num_magsites(crate)      
     # thermo(crate)
 
