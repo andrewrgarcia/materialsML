@@ -1,9 +1,9 @@
 # materialsML
 
-A Machine Learning package for materials informatics.
+A Machine Learning package for materials informatics. A crafty data analysis complement to the materials database from [The Materials Project](https://materialsproject.org)
 
 
-<center><img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/materialsML.svg?token=GHSAT0AAAAAAB3L7QYX6MRGDXNMXUVHGPBCY6HFJZQ" width="400"></center>
+<center><img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/materialsML.svg" width="400"></center>
 
 ## Installation and Local Usage 
 
