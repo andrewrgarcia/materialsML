@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "3.8.3"
-stellargraph = "^1.2.1"
+stellargraph = "1.2.1"
 mp-api = "^0.30.5"
 pytest = "^7.2.0"
 mpcontribs-client = "^5.0.7"
