@@ -1,5 +1,6 @@
 import materialsml as mml
 from mp_api.client import MPRester
+import random
 
 '''replace line 6 with API key [ in string form ] from Materials Project site (https://materialsproject.org/api#api-key) 
 and all mml.SECRET_KEY variable calls with SECRET_KEY  (see lines 9 - 10)'''
@@ -19,7 +20,7 @@ def test_materialprops():
 
 def test_multiREST():
     crate = mml.Crate(mml.SECRET_KEY)
-    crate.MATERIALS =  ['mp-'+str(i) for i in range(100)]
+    crate.MATERIALS =  ['mp-'+str(i) for i in random.sample(range(1,154718), 2000)]
     crate.queryAdd(["structure","total_magnetization","band_gap"])
 
     print(crate.graphs)
@@ -40,11 +41,13 @@ def test_graphs_loadsaveload():
 
 def test_learn():
     crate = mml.Crate(mml.SECRET_KEY)
-    crate.load('graphs_test2.json')
+    crate.MATERIALS =  ['mp-'+str(i) for i in random.sample(range(1,154718), 2000)]
+    crate.queryAdd(["structure","total_magnetization"])
+    crate.save('graphs.json')
 
     net = mml.Network()
-
-    Y,X = net.importgraphs(crate.graphs,'total_magnetization')
+    net.batch_size = 50
+    net.epochs = 100
+    net.importgraphs(crate.graphs,'total_magnetization')
     net.description()
-
     net.train()

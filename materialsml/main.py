@@ -1,6 +1,7 @@
 from mp_api.client import MPRester
 from pymatgen.analysis.diffraction.xrd import XRDCalculator
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+import matplotlib.pyplot as plt
 
 # import stellargraph as sg
 # try:
@@ -223,6 +224,7 @@ class Network:
     def __init__(self):
         self.graphs = []
         self.graph_labels = []
+        self.batch_size = 1
         self.epochs = 500
         self.fitted_model = []
         self.test_gen = []
@@ -284,14 +286,14 @@ class Network:
         train_gen = gen.flow(
             list(train_graphs.index - 1),
             targets=train_graphs.values,
-            batch_size=1,
+            batch_size=self.batch_size,
             symmetric_normalization=False,
         )
 
         test_gen = gen.flow(
             list(test_graphs.index - 1),
             targets=test_graphs.values,
-            batch_size=1,
+            batch_size=self.batch_size,
             symmetric_normalization=False,
         )
 
@@ -302,7 +304,9 @@ class Network:
 
         self.fitted_model = model
 
-        sg.utils.plot_history(history) if plot else None
+        if plot:
+            sg.utils.plot_history(history) 
+            plt.show()
 
     def test(self): return self.fitted_model.evaluate(self.test_gen)
 
