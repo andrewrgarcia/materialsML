@@ -18,10 +18,17 @@ def test_materialprops():
     print(material.graph)
 
 
+def test_materialviewer():
+    # material = mml.Solid(SECRET_KEY, 'mp-1103503')
+    material = mml.Solid(mml.SECRET_KEY, 'mp-568671')
+    material.topology()
+    mml.view(material.graph,figsize=(11, 11))
+
+
 def test_multiREST():
     crate = mml.Crate(mml.SECRET_KEY)
     crate.MATERIALS =  ['mp-'+str(i) for i in random.sample(range(1,154718), 2000)]
-    crate.queryAdd(["structure","total_magnetization","band_gap"])
+    crate.queryAdd(False, ["structure","total_magnetization","band_gap"])
 
     print(crate.graphs)
 
@@ -39,15 +46,27 @@ def test_graphs_loadsaveload():
 
 
 
-def test_learn():
+def learn(nodes_only, N_SET=1000):
+
+    bond_edges = False if nodes_only else "bond_edges"
+
     crate = mml.Crate(mml.SECRET_KEY)
-    crate.MATERIALS =  ['mp-'+str(i) for i in random.sample(range(1,154718), 2000)]
-    crate.queryAdd(["structure","total_magnetization"])
-    crate.save('graphs.json')
+    crate.MATERIALS =  ['mp-'+str(i) for i in random.sample(range(1,154718), N_SET)]
+    crate.queryAdd(bond_edges,["structure","total_magnetization"]) 
+    # crate.save('graphs.json')
 
     net = mml.Network()
     net.batch_size = 50
     net.epochs = 100
-    net.importgraphs(crate.graphs,'total_magnetization')
+    net.importgraphs(crate.graphs,'total_magnetization',bond_edges)
     net.description()
+    print(net.nodes)
+    print(net.edges)
     net.train()
+
+def test_learn(): learn(True, 1000)
+
+def test_learn_edges(): learn(False, 1000)
+
+def test_learn_edges_smaller(): learn(False, 50)
+

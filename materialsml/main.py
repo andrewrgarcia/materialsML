@@ -1,6 +1,8 @@
 from mp_api.client import MPRester
 from pymatgen.analysis.diffraction.xrd import XRDCalculator
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+from pymatgen.analysis.local_env import *
+
 import matplotlib.pyplot as plt
 
 # import stellargraph as sg
@@ -42,7 +44,7 @@ def load_from_json(filename="graphs.json"):
 
 
 
-def topol(structure, fractional=False, conventional=True):
+def topol(structure, edges="bond_edges", fractional=False, conventional=True):
     '''processes the material topology as a hashmap with an a-xyz coordinate format 
     i.e. [atom_numbers, x_coord, y_coord, z_coord]
     from a MPR[material-id].summary.structure object
@@ -54,22 +56,36 @@ def topol(structure, fractional=False, conventional=True):
     conventional: bool
         if True, returns conventional standard structure else returns primitive
     '''
+    structure0 = structure.copy()
+
     # important to use the conventional structure to ensure
     # that peaks are labelled with the conventional Miller indices
     sga = SpacegroupAnalyzer(structure)
+    
+    '''attempt to find bonds indirectly (must always specify atomic shell radius)'''
+    # persites = structure.sites
+    # NN = []
+    # for i in range(len(persites)):
+    #     NPS = structure.get_neighbors(structure[i],2.6)
+    #     Nidcs = [ persites.index(n) for n in NPS ]
+    #     NN.append(Nidcs)
 
     if conventional:
-        structure = sga.get_conventional_standard_structure()
-
-    Nsites = len(structure.sites)
+        # structure = sga.get_conventional_standard_structure()
+        structure = sga.get_refined_structure()
 
     nodes = {}
-    ckeys = ['x','y','z']
-    for i in ['atomic_number',*ckeys]:
-        nodes[i] = [] 
+    ckeys = list('xyz')
+    topol_list = ['atomic_number',*ckeys]
 
+    if edges: 
+        topol_list.append('bond_edges')
 
-    for i in range(Nsites):
+    for i in topol_list:
+        nodes[i] = []     
+
+    
+    for i in range(len(structure.sites)):
         # atomic_num = element(str(structure.sites[i].specie)).atomic_number # specie is not a typo
         atomic_num = mendeleev_elements[str(structure.sites[i].specie)] # specie is not a typo
 
@@ -77,7 +93,61 @@ def topol(structure, fractional=False, conventional=True):
         [ nodes[ckeys[k]].append(structure.sites[i].coords[k]) if not fractional else \
             nodes[ckeys[k]].append(structure.sites[i].frac_coords[k]) for k in range(3) ]
 
+        if edges:
+            'connected sites (indices)'
+            sites_for_atom_i = CrystalNN().get_nn_info(structure,i)        # This is a neighbor estimator; it does not display the actual bonds    
+
+            nodes['bond_edges'].append( np.unique( [ l['site_index'] for l in sites_for_atom_i ] ).tolist() ) 
+
+        # nodes['bond_edges'] = nodes['bond_edges'].astype('int')
+
     return nodes
+
+import numpy as np
+def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
+    '''Visualization of Material with designated topology
+    Parameters
+    ----------
+    topol_info: dict() --> atomic_number, x,y,z
+        dictionary containing the above information
+    node: int
+        atom / cluster size
+    edge: int
+        bond width
+    '''
+
+    plt.figure(figsize=figsize, dpi=dpi)
+
+    ax = plt.axes(projection='3d')
+    colors = np.linspace(2**20,2**24,118,dtype='int') #divide color range into 118 colors (for the 118 chemical elements)
+
+
+    atom = np.array(topol_info['atomic_number']).astype('int')
+
+    xyz_arr = np.array([topol_info[j] for j in list('xyz')])
+
+
+    for i in range(len(atom)):
+        NNidcs = topol_info['bond_edges'][i]
+        
+        x0,y0,z0 = xyz_arr.T[i]
+
+        x =  [topol_info['x'][k] for k in NNidcs ] 
+        y =  [topol_info['y'][k] for k in NNidcs ] 
+        z =  [topol_info['z'][k] for k in NNidcs ] 
+
+        [ax.plot((x0,x[k]),(y0,y[k]),(z0,z[k]), linewidth =5, color="#"+hex(colors[atom[i]])[2:],alpha=0.5) for k in range(len(NNidcs))]
+
+    for i in range(len(atom)):
+        
+        ax.scatter3D(*xyz_arr.T[i], s=400, c="#"+hex(colors[atom[i]])[2:])
+    
+    ax.set_facecolor('#5a5d70')
+    # set_axes_equal(ax)           
+
+    plt.axis('off')
+    plt.show()
+
 
 
 
@@ -108,7 +178,7 @@ class Solid:
         '''
         self.graph = load_from_json(filename)
 
-    def topology(self, fractional=False, conventional=True):
+    def topology(self, edges="bond_edges", fractional=False, conventional=True):
         '''helper function to load structural information of Material
 
         Parameters
@@ -122,7 +192,7 @@ class Solid:
             # first retrieve the relevant structure
             structure = mpr.get_structure_by_material_id(self.MATERIAL_ID)
         
-        self.graph = topol(structure, fractional, conventional=True)
+        self.graph = topol(structure, edges, fractional, conventional=True)
 
 
     def add(self, key, value):
@@ -174,7 +244,7 @@ class Crate:
         self.graphs = load_from_json(filename)
 
 
-    def queryAdd(self,*args):
+    def queryAdd(self,edges="bond_edges",*args):
         '''
         Example Usage:
         queryAdd("structure","total_magnetization")
@@ -189,10 +259,19 @@ class Crate:
             mid = i.material_id
             self.graphs.update({ mid : {} })
             for j in args_pass:
+                topol_list = ["atomic_number",*list('xyz')]
+
                 if j == 'structure':
-                    topol_nodes = topol(getattr(i,j), fractional=False, conventional=True)
-                    for k in ["atomic_number",*list('xyz')]:
+                    topol_nodes = topol(getattr(i,j), edges, fractional=False, conventional=True)
+                    for k in topol_list:
                         self.graphs[mid].update({ k : topol_nodes[k]})
+
+                    if edges:
+                        self.graphs[mid].update({ edges : topol_nodes[edges] })
+                        # self.graphs[mid].update({ edges : {} })
+                        # L = len(topol_nodes['x'])
+                        # [self.graphs[mid][edges].update({ l : topol_nodes[edges][l] }) for l in range(L)]
+
                 else:
                     self.graphs[mid].update({j : getattr(i,j)})
 
@@ -222,14 +301,17 @@ from tensorflow import keras
 class Network:
     
     def __init__(self):
+        self.nodes = []
+        self.edges = []
         self.graphs = []
         self.graph_labels = []
+
         self.batch_size = 1
         self.epochs = 500
         self.fitted_model = []
         self.test_gen = []
 
-    def importgraphs(self,graphs,label='band_gaps'):
+    def importgraphs(self,graphs,label='band_gaps',edges='bond_edges'):
         '''Process graphs for machine learning. 
 
         Parameters
@@ -240,18 +322,43 @@ class Network:
             label name of the property to use as the dependent Y variable in the machine
             learning method. Gets removed from graph keys and placed in a new `graphs_label` list.  
         '''
-        self.graphs = graphs
-        graph_labels = pandas.DataFrame([self.graphs[i].pop(label) for i in self.graphs.keys() ])
+        self.nodes = graphs
+        graph_labels = pandas.DataFrame([self.nodes[i].pop(label) for i in self.nodes.keys() ])
+
+        if edges:
+            EDGES_ALL_GRAPHS = [self.nodes[i].pop(edges) for i in self.nodes.keys() ]
+            EDGES_ALL_MAPS = []
+            
+            for j in EDGES_ALL_GRAPHS:
+                EDGES_I_GRAPH = j
+                edges_map = {'source': [], 'target': []}
+                source_idx = 0
+                for k in EDGES_I_GRAPH:
+                    for l in k:
+                        edges_map['source'].append(source_idx)
+                        edges_map['target'].append(l)
+                    source_idx += 1
+                EDGES_ALL_MAPS.append(edges_map)
+
+            self.edges = EDGES_ALL_MAPS
+
+        
         self.graph_labels  = graph_labels 
 
         stellar_graphs = []
-        for i in self.graphs:
-            n_atoms = len(self.graphs[i]['atomic_number'])
-            df = pandas.DataFrame(self.graphs[i], index = [idx for idx in range(n_atoms)])
-            # print(df)
-            stellar_graphs.append(StellarGraph(df))
+        k_count = 0
+        for i in self.nodes:
+            n_atoms = len(self.nodes[i]['atomic_number'])
+            df_nodes = pandas.DataFrame(self.nodes[i], index = [idx for idx in range(n_atoms)])
 
-        # stellar_graphs = [ StellarGraph(pandas.DataFrame(self.graphs[i])) for i in self.graphs.keys() ]  
+            if edges:
+                df_edges = pandas.DataFrame(EDGES_ALL_MAPS[k_count])
+                stellar_graphs.append(StellarGraph(df_nodes,df_edges))
+            else:
+                stellar_graphs.append(StellarGraph(df_nodes))
+
+            k_count+=1
+
         self.graphs = stellar_graphs  
 
         return graph_labels, stellar_graphs
