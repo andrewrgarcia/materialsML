@@ -21,6 +21,12 @@ python [your-script.py]
 To exit the virtual environment, simply type `deactivate`. To access it at any other time, type `source venv/bin/activate` on the directory containing the `venv` folder. 
 
 
+## viewer (in development)
+
+![](./examples/images/materialsML_view.png)
+
+
+
 ## Disclaimer: Use At Your Own Risk
 
 This program is free software. It comes without any warranty, to the extent permitted by applicable law. You can redistribute it and/or modify it under the terms of the MIT LICENSE, as published by Andrew Garcia. See LICENSE below for more details.

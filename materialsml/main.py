@@ -1,9 +1,7 @@
 from mp_api.client import MPRester
-from pymatgen.analysis.diffraction.xrd import XRDCalculator
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from pymatgen.analysis.local_env import *
 
 import matplotlib.pyplot as plt
+from materialsml.periph import *
 
 # import stellargraph as sg
 # try:
@@ -15,95 +13,10 @@ import matplotlib.pyplot as plt
     
 from stellargraph import StellarGraph
 import pandas
-import json
-
-
-mendeleev_elements = {'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9, 'Ne': 10, 'Na': 11, 'Mg': 12, 'Al': 13, 'Si': 14, 'P': 15, 'S': 16, 'Cl': 17, 'Ar': 18, 'K': 19, 'Ca': 20, 'Sc': 21, 'Ti': 22, 'V': 23, 'Cr': 24, 'Mn': 25, 'Fe': 26, 'Co': 27, 'Ni': 28, 'Cu': 29, 'Zn': 30, 'Ga': 31, 'Ge': 32, 'As': 33, 'Se': 34, 'Br': 35, 'Kr': 36, 'Rb': 37, 'Sr': 38, 'Y': 39, 'Zr': 40, 'Nb': 41, 'Mo': 42, 'Tc': 43, 'Ru': 44, 'Rh': 45, 'Pd': 46, 'Ag': 47, 'Cd': 48, 'In': 49, 'Sn': 50, 'Sb': 51, 'Te': 52, 'I': 53, 'Xe': 54, 'Cs': 55, 'Ba': 56, 'La': 57, 'Ce': 58, 'Pr': 59, 'Nd': 60, 'Pm': 61, 'Sm': 62, 'Eu': 63, 'Gd': 64, 'Tb': 65, 'Dy': 66, 'Ho': 67, 'Er': 68, 'Tm': 69, 'Yb': 70, 'Lu': 71, 'Hf': 72, 'Ta': 73, 'W': 74, 'Re': 75, 'Os': 76, 'Ir': 77, 'Pt': 78, 'Au': 79, 'Hg': 80, 'Tl': 81, 'Pb': 82, 'Bi': 83, 'Po': 84, 'At': 85, 'Rn': 86, 'Fr': 87, 'Ra': 88, 'Ac': 89, 'Th': 90, 'Pa': 91, 'U': 92, 'Np': 93, 'Pu': 94, 'Am': 95, 'Cm': 96, 'Bk': 97, 'Cf': 98, 'Es': 99, 'Fm': 100, 'Md': 101, 'No': 102, 'Lr': 103, 'Rf': 104, 'Db': 105, 'Sg': 106, 'Bh': 107, 'Hs': 108, 'Mt': 109, 'Ds': 110, 'Rg': 111, 'Cn': 112, 'Nh': 113, 'Fl': 114, 'Mc': 115, 'Lv': 116, 'Ts': 117, 'Og': 118}
-
-def save_to_json(filename="graphs.json",class_object={}):
-    '''Save object to JSON file
-    adapted from: https://pythonspot.com/save-a-dictionary-to-a-file/
-    '''
-    # load json module
-    # python dictionary with key value pairs
-    dict = class_object
-    # create json object from dictionary
-    jsonobj = json.dumps(dict)
-    # open file for writing, "w" 
-    f = open(filename,"w")
-    # write json object to file
-    f.write(jsonobj)
-    # close file
-    f.close()
-
-def load_from_json(filename="graphs.json"):
-    '''Load JSON file to object'''
-    with open(filename) as f:
-        data = f.read()
-    return json.loads(data)
-
-
-
-def topol(structure, edges="bond_edges", fractional=False, conventional=True):
-    '''processes the material topology as a hashmap with an a-xyz coordinate format 
-    i.e. [atom_numbers, x_coord, y_coord, z_coord]
-    from a MPR[material-id].summary.structure object
-
-    Parameters
-    ----------
-    fractional: bool
-        if False, returns xyz coordinates else returns fractional (a,b,c) coordinates
-    conventional: bool
-        if True, returns conventional standard structure else returns primitive
-    '''
-    structure0 = structure.copy()
-
-    # important to use the conventional structure to ensure
-    # that peaks are labelled with the conventional Miller indices
-    sga = SpacegroupAnalyzer(structure)
-    
-    '''attempt to find bonds indirectly (must always specify atomic shell radius)'''
-    # persites = structure.sites
-    # NN = []
-    # for i in range(len(persites)):
-    #     NPS = structure.get_neighbors(structure[i],2.6)
-    #     Nidcs = [ persites.index(n) for n in NPS ]
-    #     NN.append(Nidcs)
-
-    if conventional:
-        # structure = sga.get_conventional_standard_structure()
-        structure = sga.get_refined_structure()
-
-    nodes = {}
-    ckeys = list('xyz')
-    topol_list = ['atomic_number',*ckeys]
-
-    if edges: 
-        topol_list.append('bond_edges')
-
-    for i in topol_list:
-        nodes[i] = []     
-
-    
-    for i in range(len(structure.sites)):
-        # atomic_num = element(str(structure.sites[i].specie)).atomic_number # specie is not a typo
-        atomic_num = mendeleev_elements[str(structure.sites[i].specie)] # specie is not a typo
-
-        nodes['atomic_number'].append(atomic_num)
-        [ nodes[ckeys[k]].append(structure.sites[i].coords[k]) if not fractional else \
-            nodes[ckeys[k]].append(structure.sites[i].frac_coords[k]) for k in range(3) ]
-
-        if edges:
-            'connected sites (indices)'
-            sites_for_atom_i = CrystalNN().get_nn_info(structure,i)        # This is a neighbor estimator; it does not display the actual bonds    
-
-            nodes['bond_edges'].append( np.unique( [ l['site_index'] for l in sites_for_atom_i ] ).tolist() ) 
-
-        # nodes['bond_edges'] = nodes['bond_edges'].astype('int')
-
-    return nodes
 
 import numpy as np
+
+
 def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
     '''Visualization of Material with designated topology
     Parameters
@@ -119,13 +32,38 @@ def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
     plt.figure(figsize=figsize, dpi=dpi)
 
     ax = plt.axes(projection='3d')
-    colors = np.linspace(2**20,2**24,118,dtype='int') #divide color range into 118 colors (for the 118 chemical elements)
+    # colors = np.linspace(2**20,2**24,118,dtype='int') #divide color range into 118 colors (for the 118 chemical elements)
+    jmol_colors = {
+                'H': '#FFFFFF', 'He': '#D9FFFF', 'Li': '#CC80FF', 'Be': '#C2FF00', 'B': '#FFB5B5', 
+                'C': '#909090', 'N': '#3050F8', 'O': '#FF0D0D', 'F': '#90E050', 'Ne': '#B3E3F5',
+                'Na': '#AB5CF2', 'Mg': '#8AFF00', 'Al': '#BFA6A6', 'Si': '#F0C8A0', 'P': '#FF8000',
+                'S': '#FFFF30', 'Cl': '#1FF01F', 'Ar': '#80D1E3', 'K': '#8F40D4', 'Ca': '#3DFF00', 
+                'Sc': '#E6E6E6', 'Ti': '#BFC2C7', 'V': '#A6A6AB', 'Cr': '#8A99C7', 'Mn': '#9C7AC7',
+                'Fe': '#E06633', 'Co': '#F090A0', 'Ni': '#50D050', 'Cu': '#C88033', 'Zn': '#7D80B0',
+                'Ga': '#C28F8F', 'Ge': '#668F8F', 'As': '#BD80E3', 'Se': '#FFA100', 'Br': '#A62929',
+                'Kr': '#5CB8D1', 'Rb': '#702EB0', 'Sr': '#00FF00', 'Y': '#94FFFF', 'Zr': '#94E0E0', 
+                'Nb': '#73C2C9', 'Mo': '#54B5B5', 'Tc': '#3B9E9E', 'Ru': '#248F8F', 'Rh': '#0A7D8C', 
+                'Pd': '#006985', 'Ag': '#C0C0C0', 'Cd': '#FFD98F', 'In': '#A67573', 'Sn': '#668080', 
+                'Sb': '#9E63B5', 'Te': '#D47A00', 'I': '#940094', 'Xe': '#429EB0', 'Cs': '#57178F', 
+                'Ba': '#00C900', 'La': '#70D4FF', 'Ce': '#FFFFC7', 'Pr': '#D9FFC7', 'Nd': '#C7FFC7', 
+                'Pm': '#A3FFC7', 'Sm': '#8FFFC7', 'Eu': '#61FFC7', 'Gd': '#45FFC7', 'Tb': '#30FFC7', 
+                'Dy': '#1FFFC7', 'Ho': '#00FF9C', 'Er': '#00E675', 'Tm': '#00D452', 'Yb': '#00BF38', 
+                'Lu': '#00AB24', 'Hf': '#4DC2FF', 'Ta': '#4DA6FF', 'W': '#2194D6', 'Re': '#267DAB', 
+                'Os': '#266696', 'Ir': '#175487', 'Pt': '#D0D0E0', 'Au': '#FFD123', 'Hg': '#B8B8D0', 
+                'Tl': '#A6544D', 'Pb': '#575961', 'Bi': '#9E4FB5', 'Po': '#AB5C00', 'At': '#754F45', 
+                'Rn': '#428296', 'Fr': '#420066', 'Ra': '#007D00', 'Ac': '#70ABFA', 'Th': '#00BAFF', 
+                'Pa': '#00A1FF', 'U': '#008FFF', 'Np': '#0080FF', 'Pu': '#006BFF', 'Am': '#545CF2',
+                'Cm': '#785CE3', 'Bk': '#8A4FE3', 'Cf': '#A136D4', 'Es': '#B31FD4', 'Fm': '#B31FBA',
+                'Md': '#B30DA6', 'No': '#BD0D87', 'Lr': '#C70066', 'Rf': '#CC0059', 'Db': '#D1004F',
+                'Sg': '#D90045', 'Bh': '#E00038', 'Hs': '#E6002E', 'Mt': '#EB0026'
+                }
 
 
-    atom = np.array(topol_info['atomic_number']).astype('int')
+    atom = topol_info['atom']
 
     xyz_arr = np.array([topol_info[j] for j in list('xyz')])
 
+    print( xyz_arr.T)
 
     for i in range(len(atom)):
         NNidcs = topol_info['bond_edges'][i]
@@ -136,19 +74,20 @@ def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
         y =  [topol_info['y'][k] for k in NNidcs ] 
         z =  [topol_info['z'][k] for k in NNidcs ] 
 
-        [ax.plot((x0,x[k]),(y0,y[k]),(z0,z[k]), linewidth =5, color="#"+hex(colors[atom[i]])[2:],alpha=0.5) for k in range(len(NNidcs))]
+        [ax.plot((x0,x[k]),(y0,y[k]),(z0,z[k]), linewidth =5,\
+             color=jmol_colors[atom[i]], alpha=0.5) for k in range(len(NNidcs))]
+             
 
     for i in range(len(atom)):
         
-        ax.scatter3D(*xyz_arr.T[i], s=400, c="#"+hex(colors[atom[i]])[2:])
-    
-    ax.set_facecolor('#5a5d70')
-    # set_axes_equal(ax)           
+        # ax.scatter3D(*xyz_arr.T[i], s=1500, linewidths=3, edgecolors='#dddddd', c="#"+hex(colors[atom[i]])[2:])
+        ax.scatter3D(*xyz_arr.T[i], s=1500, linewidths=3, edgecolors='#dddddd', c=jmol_colors[atom[i]] )
+
+    ax.set_facecolor('#0e0e12')
+    set_axes_equal(ax)           
 
     plt.axis('off')
     plt.show()
-
-
 
 
 class Solid:
@@ -249,8 +188,9 @@ class Crate:
         Example Usage:
         queryAdd("structure","total_magnetization")
         '''
-        print(list(args)[0])
-        args_pass = list(args)[0]
+        # print(list(args)[0])
+        # args_pass = list(args)[0]
+        args_pass = args
         with MPRester(api_key=self.API_KEY) as mpr:
             mpresults = mpr.summary.search(material_ids=self.MATERIALS, fields=['material_id',*args_pass])
     
