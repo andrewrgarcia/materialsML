@@ -23,7 +23,7 @@ To exit the virtual environment, simply type `deactivate`. To access it at any o
 
 ## viewer (in development)
 
-![](./examples/images/materialsML_view.png)
+![](./examples/images/materialsML_view0124.png)
 
 
 
