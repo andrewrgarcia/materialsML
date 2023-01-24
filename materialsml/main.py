@@ -84,6 +84,9 @@ def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
         ax.scatter3D(*xyz_arr.T[i], s=1500, linewidths=3, edgecolors='#dddddd', c=jmol_colors[atom[i]] )
 
     ax.set_facecolor('#0e0e12')
+    # ax.set_facecolor('#626279')
+
+    
     set_axes_equal(ax)           
 
     plt.axis('off')
@@ -106,6 +109,7 @@ class Solid:
         self.API_KEY = API_KEY
         self.MATERIAL_ID = MATERIAL_ID
         self.graph = {}
+        self.structure = []
 
     def save(self,filename="graph.json"):
         '''Save Crate().graphs as a JSON file
@@ -129,9 +133,9 @@ class Solid:
         '''
         with MPRester(self.API_KEY) as mpr:
             # first retrieve the relevant structure
-            structure = mpr.get_structure_by_material_id(self.MATERIAL_ID)
+            self.structure = mpr.get_structure_by_material_id(self.MATERIAL_ID)
         
-        self.graph = topol(structure, edges, fractional, conventional=True)
+        self.graph = topol(self.structure, edges, fractional, conventional=True)
 
 
     def add(self, key, value):

@@ -6,7 +6,7 @@ import random
 and all mml.SECRET_KEY variable calls with SECRET_KEY  (see lines 9 - 10)'''
 # SECRET_KEY = ''    
 
-def tedst_materialprops():
+def test_materialprops():
     # material = mml.Solid(SECRET_KEY, 'mp-1103503')
     material = mml.Solid(mml.SECRET_KEY, 'mp-1103503')
 
@@ -18,7 +18,7 @@ def tedst_materialprops():
     print(material.graph)
 
 
-def tedst_materialviewer():
+def test_materialviewer():
     # material = mml.Solid(SECRET_KEY, 'mp-1103503')
     material = mml.Solid(mml.SECRET_KEY, 'mp-568671')
     material.topology()
@@ -34,7 +34,7 @@ def test_multiREST():
 
     crate.save('graphs_test.json')
 
-def tedst_graphs_loadsaveload():
+def test_graphs_loadsaveload():
     crate = mml.Crate(mml.SECRET_KEY)
     crate.load('graphs_test.json')
     crate.remove_field('band_gap')
@@ -64,9 +64,9 @@ def learn(nodes_only, N_SET=1000):
     print(net.edges)
     net.train()
 
-def tedst_learn(): learn(True, 1000)
+def test_learn(): learn(True, 1000)
 
-def tedst_learn_edges(): learn(False, 1000)
+def test_learn_edges(): learn(False, 1000)
 
-def tedst_learn_edges_smaller(): learn(False, 50)
+def test_learn_edges_smaller(): learn(False, 50)
 
