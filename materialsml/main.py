@@ -95,7 +95,7 @@ def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
 
 class Solid:
     def __init__( self, API_KEY, MATERIAL_ID = 'mp-1103503'):
-        '''Material class. To store and process material data
+        '''Solid class. To store and process individual material data
 
         Parameters
         ----------
@@ -104,7 +104,9 @@ class Solid:
         MATERIAL_ID : str
             ID of selected material 
         graph : dict()
-            Heterogeneous graph to store all information from a `Solid` material
+            Homogeneous multi-feature graph to store all information from a `Solid` material
+        structure: object
+            structure object from pymatgen containing all information from the specified Material with MATERIAL_ID
         '''
         self.API_KEY = API_KEY
         self.MATERIAL_ID = MATERIAL_ID
@@ -153,7 +155,7 @@ class Solid:
 
 class Crate:
     def __init__( self, API_KEY):
-        '''Material class. To store and process material data
+        '''Crate class. To handle multiple materials. 
 
         Parameters
         ----------
@@ -163,10 +165,6 @@ class Crate:
             List potential materials (IDs) to place in the `graphs` dict / dataset
         graphs : dict(*MATERIALS: *dict())
             Dictionary of Heterogeneous graphs of extracted MATERIALS
-        blacklist : list(str)
-            List of materials (IDs) rejected from graphs dataset due to lack of information for an added Property. 
-            For instance, if a material property to be analyzed is total_magnetization, the materials who lack 
-            it will be dropped from the `graphs` variable and placed in this `blacklist`
         num_cores : int
             Number of [ multiprocessing ] cores to be used in parallel for extracting data from the 
             Materials Project server (in progress). 
@@ -245,6 +243,30 @@ from tensorflow import keras
 class Network:
     
     def __init__(self):
+        '''Network class. For Machine Learning. Currently uses a DeepGraphCNN graph neural network model to correlate
+        material properties. 
+
+        Parameters
+        ----------
+        nodes : pandas.Dataframe()
+            secret API KEY used to run MPRester data requests
+        edges : pandas.Dataframe()
+            List potential materials (IDs) to place in the `graphs` dict / dataset
+        graphs : dict(*MATERIALS: *dict())
+            Dictionary of Homogeneous graphs of extracted MATERIALS
+        graph_labels : pandas.Dataframe()
+            list of quantitative values of property to be used as predicting "Y" variable or "label"
+        
+        
+        batch_size : int
+            size of batch for batch training process
+        epochs : int
+            number of training / learning epochs
+        fitted_model : Keras model 
+            fitted model after training. This variable is used to move model across functions in the same Network class. 
+        test_gen : StellarGraph object 
+            Fragment of graph data to be used for testing.      
+        '''
         self.nodes = []
         self.edges = []
         self.graphs = []

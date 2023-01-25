@@ -5,7 +5,11 @@ A Machine Learning package for materials informatics. A crafty data analysis com
 
 <center><img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/materialsML.svg" width="400"></center>
 
-## Installation and Local Usage 
+## Getting Started 
+
+[![](./notebook.png)](https://colab.research.google.com/drive/19PD1d6FlRWKdhBYoTWkKfI9O3XiLDZeM?usp=sharing)
+
+## Local Installation and Usage 
 
 ```ruby
 pip install materialsml
