@@ -63,7 +63,7 @@ def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
 
     xyz_arr = np.array([topol_info[j] for j in list('xyz')])
 
-    print( xyz_arr.T)
+    # print( xyz_arr.T)
 
     for i in range(len(atom)):
         NNidcs = topol_info['bond_edges'][i]
