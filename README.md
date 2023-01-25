@@ -7,7 +7,7 @@ A Machine Learning package for materials informatics. A crafty data analysis com
 
 ## Getting Started 
 
-<a href="https://colab.research.google.com/drive/19PD1d6FlRWKdhBYoTWkKfI9O3XiLDZeM?usp=sharing"><img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/notebook.png"></a>
+<a href="https://colab.research.google.com/drive/19PD1d6FlRWKdhBYoTWkKfI9O3XiLDZeM?usp=sharing"><img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/notebook.png" width=600></a>
 
 
 ## Local Installation and Usage 
@@ -28,7 +28,7 @@ To exit the virtual environment, simply type `deactivate`. To access it at any o
 
 ## viewer (in development)
 
-<center><img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/examples/images/materialsML_view0124.png" width="400"></center>
+<center><img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/examples/images/materialsML_view0124.png"></center>
 
 
 ## Disclaimer: Use At Your Own Risk
