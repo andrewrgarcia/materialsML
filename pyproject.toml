@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "materialsml"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Machine Learning package for materials informatics"
 authors = ["andrewrgarcia <garcia.gtr@gmail.com>"]
 readme = "README.md"
