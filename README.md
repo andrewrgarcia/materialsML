@@ -3,7 +3,7 @@
 A Machine Learning package for materials informatics. A crafty data analysis complement to the materials database from [The Materials Project](https://materialsproject.org)
 
 
-<center><img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/materialsML.svg" width="400"></center>
+<img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/materialsML.svg" width="400">
 
 ## Getting Started 
 
@@ -28,7 +28,7 @@ To exit the virtual environment, simply type `deactivate`. To access it at any o
 
 ## viewer (in development)
 
-<center><img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/examples/images/materialsML_view0124.png"></center>
+<img src="https://raw.githubusercontent.com/andrewrgarcia/materialsML/main/examples/images/materialsML_view0126.png">
 
 
 ## Disclaimer: Use At Your Own Risk

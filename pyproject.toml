@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "materialsml"
-version = "0.2.3"
+version = "0.3.0"
 description = "A Machine Learning package for materials informatics"
 authors = ["andrewrgarcia <garcia.gtr@gmail.com>"]
 readme = "README.md"
@@ -13,6 +13,7 @@ pytest = "^7.2.0"
 mpcontribs-client = "^5.0.7"
 boto3 = "^1.26.50"
 chardet = "^5.1.0"
+pyvista = "^0.37.0"
 
 
 [build-system]

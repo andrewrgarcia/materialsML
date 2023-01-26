@@ -13,25 +13,29 @@ from materialsml.periph import *
     
 from stellargraph import StellarGraph
 import pandas
+import pyvista as pv
+import pickle
 
 import numpy as np
 
-
-def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
+def view(topol_info, window_size=[1024, 768], node_size = 85, tube_radius = 0.1, tube_alpha=0.25, background_color='#696f85' ):
     '''Visualization of Material with designated topology
     Parameters
     ----------
     topol_info: dict() --> atomic_number, x,y,z
         dictionary containing the above information
-    node: int
-        atom / cluster size
-    edge: int
-        bond width
+    window_size: list([int,int])
+        Size of PyVista Window default: [1024,768]
+    node_size: int
+        Size of node. Node represents an atom / cluster of material
+    tube_radius: float
+        radius of tube. Tube represents bond / edge of material
+    tube_alpha: float
+        Opacity of tube. 
+    background_color: string / hexanumerical 
+        Background color of PyVista window
     '''
 
-    plt.figure(figsize=figsize, dpi=dpi)
-
-    ax = plt.axes(projection='3d')
     # colors = np.linspace(2**20,2**24,118,dtype='int') #divide color range into 118 colors (for the 118 chemical elements)
     jmol_colors = {
                 'H': '#FFFFFF', 'He': '#D9FFFF', 'Li': '#CC80FF', 'Be': '#C2FF00', 'B': '#FFB5B5', 
@@ -59,11 +63,51 @@ def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
                 }
 
 
+    def Tube(tube_0,tube_f,rad):
+
+        def make_points(crds1=tube_0,crds2=tube_f):
+            """Helper to make XYZ points"""
+
+            x0,y0,z0 = crds1
+            xf,yf,zf = crds2
+
+            theta = np.linspace(0, 2 * np.pi, 100)
+            z = np.linspace(z0,zf, 100)
+            x = np.linspace(x0, xf, 100)
+            y = np.linspace(y0, yf, 100)
+            return np.column_stack((x, y, z))
+
+
+        def polyline_from_points(points):
+            poly = pv.PolyData()
+            poly.points = points
+            the_cell = np.arange(0, len(points), dtype=np.int_)
+            the_cell = np.insert(the_cell, 0, len(points))
+            poly.lines = the_cell
+            return poly
+
+        points = make_points()
+        polyline = polyline_from_points(points)
+        polyline["scalars"] = np.arange(polyline.n_points)
+        
+        return polyline.tube(radius=rad)
+
+
     atom = topol_info['atom']
 
     xyz_arr = np.array([topol_info[j] for j in list('xyz')])
 
-    # print( xyz_arr.T)
+
+    pl = pv.Plotter(window_size = window_size)
+    if background_color != "": 
+        pl.background_color = background_color 
+
+
+    for i in range(len(atom)):
+
+        cloud = pv.wrap(xyz_arr.T[i])
+        pl.add_mesh(cloud, color=jmol_colors[atom[i]], render_points_as_spheres=True,point_size=node_size)
+
 
     for i in range(len(atom)):
         NNidcs = topol_info['bond_edges'][i]
@@ -74,23 +118,15 @@ def view(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
         y =  [topol_info['y'][k] for k in NNidcs ] 
         z =  [topol_info['z'][k] for k in NNidcs ] 
 
-        [ax.plot((x0,x[k]),(y0,y[k]),(z0,z[k]), linewidth =5,\
-             color=jmol_colors[atom[i]], alpha=0.5) for k in range(len(NNidcs))]
-             
+        # [ax.plot((x0,x[k]),(y0,y[k]),(z0,z[k]), linewidth =5,\
+        #      color=jmol_colors[atom[i]], alpha=0.5) for k in range(len(NNidcs))]
 
-    for i in range(len(atom)):
-        
-        # ax.scatter3D(*xyz_arr.T[i], s=1500, linewidths=3, edgecolors='#dddddd', c="#"+hex(colors[atom[i]])[2:])
-        ax.scatter3D(*xyz_arr.T[i], s=1500, linewidths=3, edgecolors='#dddddd', c=jmol_colors[atom[i]] )
-
-    ax.set_facecolor('#0e0e12')
-    # ax.set_facecolor('#626279')
-
+        for k in range(len(NNidcs)):
+            toob = Tube((x0,y0,z0),(x[k],y[k],z[k]),rad=tube_radius)   
+            pl.add_mesh(toob,opacity=tube_alpha, smooth_shading=True)
     
-    set_axes_equal(ax)           
-
-    plt.axis('off')
-    plt.show()
+    pl.remove_scalar_bar()
+    pl.show()
 
 
 class Solid:
@@ -113,6 +149,16 @@ class Solid:
         self.graph = {}
         self.structure = []
 
+    def SolidSave(self,filename="solid.pickle"):
+        '''Save Material information loaded from MP server'''
+        with open(filename, 'wb') as f: 
+            pickle.dump(self.structure, f)
+
+    def SolidLoad(self,filename="solid.pickle"):
+        '''Load Material information loaded from MP server'''
+        with open(filename, 'rb') as f: 
+            self.structure = pickle.load(f,encoding="latin1")
+
     def save(self,filename="graph.json"):
         '''Save Crate().graphs as a JSON file
         '''
@@ -133,9 +179,10 @@ class Solid:
         conventional: bool
             if True, returns conventional standard structure else returns primitive
         '''
-        with MPRester(self.API_KEY) as mpr:
-            # first retrieve the relevant structure
-            self.structure = mpr.get_structure_by_material_id(self.MATERIAL_ID)
+        if self.MATERIAL_ID != "":
+            with MPRester(self.API_KEY) as mpr:
+                # first retrieve the relevant structure
+                self.structure = mpr.get_structure_by_material_id(self.MATERIAL_ID)
         
         self.graph = topol(self.structure, edges, fractional, conventional=True)
 
