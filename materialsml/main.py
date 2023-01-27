@@ -107,25 +107,26 @@ def view(topol_info, window_size=[1024, 768], node_size = 85, tube_radius = 0.1,
 
         cloud = pv.wrap(xyz_arr.T[i])
         pl.add_mesh(cloud, color=jmol_colors[atom[i]], render_points_as_spheres=True,point_size=node_size)
-
-
-    for i in range(len(atom)):
-        NNidcs = topol_info['bond_edges'][i]
-        
-        x0,y0,z0 = xyz_arr.T[i]
-
-        x =  [topol_info['x'][k] for k in NNidcs ] 
-        y =  [topol_info['y'][k] for k in NNidcs ] 
-        z =  [topol_info['z'][k] for k in NNidcs ] 
-
-        # [ax.plot((x0,x[k]),(y0,y[k]),(z0,z[k]), linewidth =5,\
-        #      color=jmol_colors[atom[i]], alpha=0.5) for k in range(len(NNidcs))]
-
-        for k in range(len(NNidcs)):
-            toob = Tube((x0,y0,z0),(x[k],y[k],z[k]),rad=tube_radius)   
-            pl.add_mesh(toob,opacity=tube_alpha, smooth_shading=True)
     
-    pl.remove_scalar_bar()
+    if 'bond_edges' in topol_info.keys():
+        for i in range(len(atom)):
+            NNidcs = topol_info['bond_edges'][i]
+            
+            x0,y0,z0 = xyz_arr.T[i]
+
+            x =  [topol_info['x'][k] for k in NNidcs ] 
+            y =  [topol_info['y'][k] for k in NNidcs ] 
+            z =  [topol_info['z'][k] for k in NNidcs ] 
+
+            # [ax.plot((x0,x[k]),(y0,y[k]),(z0,z[k]), linewidth =5,\
+            #      color=jmol_colors[atom[i]], alpha=0.5) for k in range(len(NNidcs))]
+
+            for k in range(len(NNidcs)):
+                toob = Tube((x0,y0,z0),(x[k],y[k],z[k]),rad=tube_radius)   
+                pl.add_mesh(toob,opacity=tube_alpha, smooth_shading=True)
+    
+        pl.remove_scalar_bar()
+        
     pl.show()
 
 

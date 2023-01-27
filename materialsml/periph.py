@@ -6,7 +6,7 @@ import json
 import matplotlib.pyplot as plt
 
 
-def view__legacy(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
+def view__legacy(topol_info, figsize=(8, 6), dpi=80, node_size = 1500, tube_radius = 5, edge = 5 ):
     '''Visualization of Material with designated topology
     Legacy code (older)
     Parameters
@@ -53,25 +53,26 @@ def view__legacy(topol_info, figsize=(8, 6), dpi=80, node = 400, edge = 5 ):
 
     xyz_arr = np.array([topol_info[j] for j in list('xyz')])
 
-    print( xyz_arr.T )
+    # print( xyz_arr.T )
 
-    for i in range(len(atom)):
-        NNidcs = topol_info['bond_edges'][i]
-        
-        x0,y0,z0 = xyz_arr.T[i]
+    if 'bond_edges' in topol_info.keys():
+        for i in range(len(atom)):
+            NNidcs = topol_info['bond_edges'][i]
+            
+            x0,y0,z0 = xyz_arr.T[i]
 
-        x =  [topol_info['x'][k] for k in NNidcs ] 
-        y =  [topol_info['y'][k] for k in NNidcs ] 
-        z =  [topol_info['z'][k] for k in NNidcs ] 
+            x =  [topol_info['x'][k] for k in NNidcs ] 
+            y =  [topol_info['y'][k] for k in NNidcs ] 
+            z =  [topol_info['z'][k] for k in NNidcs ] 
 
-        [ax.plot((x0,x[k]),(y0,y[k]),(z0,z[k]), linewidth =5,\
-             color=jmol_colors[atom[i]], alpha=0.5) for k in range(len(NNidcs))]
+            [ax.plot((x0,x[k]),(y0,y[k]),(z0,z[k]), linewidth = tube_radius,\
+                color=jmol_colors[atom[i]], alpha=0.5) for k in range(len(NNidcs))]
              
 
     for i in range(len(atom)):
         
         # ax.scatter3D(*xyz_arr.T[i], s=1500, linewidths=3, edgecolors='#dddddd', c="#"+hex(colors[atom[i]])[2:])
-        ax.scatter3D(*xyz_arr.T[i], s=1500, linewidths=3, edgecolors='#dddddd', c=jmol_colors[atom[i]] )
+        ax.scatter3D(*xyz_arr.T[i], s=node_size, linewidths=3, edgecolors='#dddddd', c=jmol_colors[atom[i]] )
 
     ax.set_facecolor('#0e0e12')
     # ax.set_facecolor('#626279')

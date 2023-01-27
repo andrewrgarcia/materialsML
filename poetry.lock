@@ -487,14 +487,14 @@ wmi = ["wmi (>=1.5.1,<2.0.0)"]
 
 [[package]]
 name = "emmet-core"
-version = "0.39.13"
+version = "0.41.0"
 description = "Core Emmet Library"
 category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "emmet-core-0.39.13.tar.gz", hash = "sha256:74689f65dd9a59efa7718a8163996ca25b06672e7bf3db9eb06632c2696dce65"},
-    {file = "emmet_core-0.39.13-py3-none-any.whl", hash = "sha256:6d6bd54be4a0378239464ff82f3650fc874dd79ddc41a969228bcab6f4a48b81"},
+    {file = "emmet-core-0.41.0.tar.gz", hash = "sha256:d69736b0912beef810a4c6a8daa7b662aa1506b15bb0391003a401d4c1fa089e"},
+    {file = "emmet_core-0.41.0-py3-none-any.whl", hash = "sha256:850a548d3e09f2756fe9fc7a245260263775e47181019067ffaa5843fdcbc5d0"},
 ]
 
 [package.dependencies]
@@ -967,14 +967,14 @@ files = [
 
 [[package]]
 name = "ipython"
-version = "8.8.0"
+version = "8.9.0"
 description = "IPython: Productive Interactive Computing"
 category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "ipython-8.8.0-py3-none-any.whl", hash = "sha256:da01e6df1501e6e7c32b5084212ddadd4ee2471602e2cf3e0190f4de6b0ea481"},
-    {file = "ipython-8.8.0.tar.gz", hash = "sha256:f3bf2c08505ad2c3f4ed5c46ae0331a8547d36bf4b21a451e8ae80c0791db95b"},
+    {file = "ipython-8.9.0-py3-none-any.whl", hash = "sha256:9c207b0ef2d276d1bfcfeb9a62804336abbe4b170574ea061500952319b1d78c"},
+    {file = "ipython-8.9.0.tar.gz", hash = "sha256:71618e82e6d59487bea059626e7c79fb4a5b760d1510d02fab1160db6fdfa1f7"},
 ]
 
 [package.dependencies]
@@ -986,7 +986,7 @@ jedi = ">=0.16"
 matplotlib-inline = "*"
 pexpect = {version = ">4.3", markers = "sys_platform != \"win32\""}
 pickleshare = "*"
-prompt-toolkit = ">=3.0.11,<3.1.0"
+prompt-toolkit = ">=3.0.30,<3.1.0"
 pygments = ">=2.4.0"
 stack-data = "*"
 traitlets = ">=5"
